@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaleside TBYB - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.5;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #1e293b;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-bars {
+            display: flex;
+            gap: 2px;
+            align-items: end;
+        }
+
+        .bar {
+            background: white;
+            border-radius: 1px;
+        }
+
+        .bar:nth-child(1) { width: 4px; height: 8px; }
+        .bar:nth-child(2) { width: 4px; height: 12px; }
+        .bar:nth-child(3) { width: 4px; height: 16px; }
+
+        .logo-curve {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            right: 2px;
+            height: 6px;
+            background: white;
+            border-radius: 0 0 4px 4px;
+            opacity: 0.9;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            letter-spacing: -0.5px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .date-picker {
+            position: relative;
+        }
+
+        .date-picker-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #374151;
+            min-width: 160px;
+        }
+
+        .date-picker-btn:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .date-picker-btn.open {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .date-picker-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all 0.2s ease;
+        }
+
+        .date-picker-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .date-option {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .date-option:hover {
+            background: #f8fafc;
+        }
+
+        .date-option.selected {
+            background: #eff6ff;
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .date-option:last-child {
+            border-bottom: none;
+        }
+
+        .date-option.custom {
+            border-top: 1px solid #e5e7eb;
+            font-weight: 500;
+            color: #2563eb;
+        }
+
+        .custom-date-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .custom-date-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .custom-date-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.95);
+            transition: transform 0.2s ease;
+        }
+
+        .custom-date-modal.show .custom-date-content {
+            transform: scale(1);
+        }
+
+        .custom-date-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .custom-date-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: #6b7280;
+            border-radius: 4px;
+        }
+
+        .close-modal:hover {
+            background: #f3f4f6;
+        }
+
+        .date-range-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .date-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .date-input-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .date-input {
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .quick-presets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #374151;
+        }
+
+        .preset-btn:hover {
+            background: #f8fafc;
+            border-color: #d1d5db;
+        }
+
+        .preset-btn.active {
+            background: #eff6ff;
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+
+        .compare-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .compare-checkbox {
+            width: 16px;
+            height: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .modal-btn.apply {
+            background: #2563eb;
+            color: white;
+        }
+
+        .modal-btn.apply:hover {
+            background: #1d4ed8;
+        }
+
+        .notification-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #6b7280;
+        }
+
+        .notification-btn:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 12px 6px 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .user-menu:hover {
+            background: #f8fafc;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+            line-height: 1.2;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.2;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 64px);
+        }
+
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #e5e5e5;
+            padding: 24px 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 32px;
+        }
+
+        .sidebar-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #6b7280;
+            padding: 0 24px 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: #6b7280;
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .sidebar-item.active {
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.1) 0%, transparent 100%);
+            color: #2563eb;
+            border-right: 3px solid #2563eb;
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background: #f8fafc;
+            color: #374151;
+        }
+
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 16px;
+            opacity: 0.8;
+        }
+
+        .sidebar-item.active .sidebar-icon {
+            opacity: 1;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+
+        .page-title-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .create-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-size: 14px;
+        }
+
+        .create-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+        }
+
+        /* Global KPIs Section */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #f3f4f6;
+            position: relative;
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .kpi-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: help;
+            position: relative;
+        }
+
+        .kpi-title:hover {
+            color: #374151;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            margin-bottom: 8px;
+            font-weight: 400;
+            max-width: 280px;
+            white-space: normal;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1f2937;
+        }
+
+        .kpi-title:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        .tooltip-label {
+            color: #9ca3af;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .kpi-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .kpi-change {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .kpi-change.positive {
+            color: #059669;
+        }
+
+        .kpi-change.negative {
+            color: #dc2626;
+        }
+
+        .kpi-change.neutral {
+            color: #6b7280;
+        }
+
+        /* Alert Feed Section */
+        .alert-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #f3f4f6;
+            margin-bottom: 32px;
+        }
+
+        .alert-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: between;
+        }
+
+        .alert-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .alert-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .alert-item {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f9fafb;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .alert-item:hover {
+            background: #f8fafc;
+        }
+
+        .alert-item:last-child {
+            border-bottom: none;
+        }
+
+        .alert-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .alert-icon.critical {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .alert-icon.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .alert-icon.info {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-message {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 2px;
+        }
+
+        .alert-time {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .alert-action {
+            background: #f3f4f6;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #374151;
+        }
+
+        .alert-action:hover {
+            background: #e5e7eb;
+        }
+
+        /* Top Funnels Section */
+        .funnels-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #f3f4f6;
+            margin-bottom: 32px;
+        }
+
+        .funnels-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .funnels-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .view-all-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .view-all-link:hover {
+            color: #1d4ed8;
+        }
+
+        .funnel-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .funnel-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #f9fafb;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .funnel-item:hover {
+            background: #f8fafc;
+        }
+
+        .funnel-item:last-child {
+            border-bottom: none;
+        }
+
+        .funnel-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .funnel-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .funnel-name {
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .funnel-meta {
+            font-size: 13px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .funnel-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-testing {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .funnel-metrics {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            margin-right: 16px;
+        }
+
+        .metric {
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.2;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .funnel-trend {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trend-up {
+            color: #059669;
+        }
+
+        .trend-down {
+            color: #dc2626;
+        }
+
+        .trend-flat {
+            color: #6b7280;
+        }
+
+        @media (max-width: 1024px) {
+            .kpi-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .funnel-metrics {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-end;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 16px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .funnel-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px;
+            }
+
+            .funnel-metrics {
+                width: 100%;
+                justify-content: space-between;
+                flex-direction: row;
+            }
+
+            .timeframe-toggle {
+                order: -1;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-section">
+            <div class="logo-icon">
+                <div class="logo-bars">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+                <div class="logo-curve"></div>
+            </div>
+            <div class="logo-text">Scaleside</div>
+        </div>
+        
+        <div class="header-right">
+            <div class="date-picker">
+                <button class="date-picker-btn" id="datePicker">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span id="datePickerText">Last 7 days</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6,9 12,15 18,9"></polyline>
+                    </svg>
+                </button>
+                
+                <div class="date-picker-dropdown" id="dateDropdown">
+                    <div class="date-option selected" data-value="today">
+                        <span>Today</span>
+                    </div>
+                    <div class="date-option" data-value="yesterday">
+                        <span>Yesterday</span>
+                    </div>
+                    <div class="date-option selected" data-value="7d">
+                        <span>Last 7 days</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20,6 9,17 4,12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="date-option" data-value="30d">
+                        <span>Last 30 days</span>
+                    </div>
+                    <div class="date-option" data-value="this-week">
+                        <span>This Week</span>
+                    </div>
+                    <div class="date-option" data-value="last-week">
+                        <span>Last Week</span>
+                    </div>
+                    <div class="date-option" data-value="this-month">
+                        <span>This Month</span>
+                    </div>
+                    <div class="date-option" data-value="last-month">
+                        <span>Last Month</span>
+                    </div>
+                    <div class="date-option custom" data-value="custom">
+                        <span>Custom Range...</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="notification-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <div class="notification-dot"></div>
+            </button>
+            
+            <div class="user-menu">
+                <div class="user-avatar">JD</div>
+                <div class="user-info">
+                    <div class="user-name">John Doe</div>
+                    <div class="user-role">Admin</div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Main</div>
+                <a href="#" class="sidebar-item active">
+                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="#" class="sidebar-item">
+                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    </svg>
+                    Funnels
+                </a>
+                <a href="#" class="sidebar-item">
+                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <polyline points="17,11 19,13 23,9"></polyline>
+                    </svg>
+                    Customers
+                </a>
+                <a href="#" class="sidebar-item">
+                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    Orders
+                </a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Management</div>
+                <a href="#" class="sidebar-item">
+                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="8"></circle>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                    </svg>
+                    Trial Management
+                </a>
+                <a href="#" class="sidebar-item">
+                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Analytics
+                </a>
+                <a href="#" class="sidebar-item">
+                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    Settings
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-title-section">
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Performance overview for the last 7 days</p>
+                </div>
+                <div class="quick-actions">
+                    <button class="create-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Create New Funnel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Global KPIs -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-title">
+                            Trials Started
+                            <div class="tooltip">
+                                New leads entering trial flow (volume metric)
+                            </div>
+                        </div>
+                        <div class="kpi-icon" style="background: #eff6ff; color: #2563eb;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="8"></circle>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-value">1,247</div>
+                    <div class="kpi-change positive">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline>
+                            <polyline points="17,6 23,6 23,12"></polyline>
+                        </svg>
+                        +18% vs last period
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-title">
+                            Trial-to-Paid Conversion
+                            <div class="tooltip">
+                                % of trials successfully charged at trial end
+                            </div>
+                        </div>
+                        <div class="kpi-icon" style="background: #f0fdf4; color: #16a34a;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-value">64.8%</div>
+                    <div class="kpi-change positive">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline>
+                            <polyline points="17,6 23,6 23,12"></polyline>
+                        </svg>
+                        +2.4% vs last period
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-title">
+                            Blended AOV
+                            <div class="tooltip">
+                                <div class="tooltip-label">All Trials</div>
+                                Revenue ÷ All Trials - for benchmarking ad efficiency
+                            </div>
+                        </div>
+                        <div class="kpi-icon" style="background: #fefce8; color: #ca8a04;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7v10l10 5 10-5V7z"></path>
+                                <polyline points="2,7 12,12 22,7"></polyline>
+                                <polyline points="12,22 12,12"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-value">$86.40</div>
+                    <div class="kpi-change positive">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline>
+                            <polyline points="17,6 23,6 23,12"></polyline>
+                        </svg>
+                        +5.2% vs last period
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-title">
+                            True AOV
+                            <div class="tooltip">
+                                <div class="tooltip-label">Kept Trials Only</div>
+                                Revenue ÷ Successful Conversions - for profitability analysis
+                            </div>
+                        </div>
+                        <div class="kpi-icon" style="background: #fdf2f8; color: #db2777;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <path d="M16 10a4 4 0 0 1-8 0"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-value">$133.30</div>
+                    <div class="kpi-change neutral">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        +0.8% vs last period
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-title">
+                            Total Revenue
+                            <div class="tooltip">
+                                Gross revenue from all paid conversions + upsells
+                            </div>
+                        </div>
+                        <div class="kpi-icon" style="background: #ecfdf5; color: #059669;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-value">$107,730</div>
+                    <div class="kpi-change positive">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline>
+                            <polyline points="17,6 23,6 23,12"></polyline>
+                        </svg>
+                        +31% vs last period
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-title">
+                            Failed Charge Rate
+                            <div class="tooltip">
+                                % of trials that failed to auto-charge (payment/technical issues)
+                            </div>
+                        </div>
+                        <div class="kpi-icon" style="background: #fef2f2; color: #dc2626;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-value">8.4%</div>
+                    <div class="kpi-change negative">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,18 13.5,8.5 8.5,13.5 1,6"></polyline>
+                            <polyline points="17,18 23,18 23,12"></polyline>
+                        </svg>
+                        +1.8% needs attention
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <div class="kpi-title">
+                            Refund Rate
+                            <div class="tooltip">
+                                % of successful charges that were refunded
+                            </div>
+                        </div>
+                        <div class="kpi-icon" style="background: #f0f9ff; color: #0284c7;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="1,4 1,10 7,10"></polyline>
+                                <polyline points="23,20 23,14 17,14"></polyline>
+                                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-value">3.2%</div>
+                    <div class="kpi-change positive">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline>
+                            <polyline points="17,6 23,6 23,12"></polyline>
+                        </svg>
+                        -0.8% improvement
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Feed -->
+            <div class="alert-section">
+                <div class="alert-header">
+                    <div class="alert-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        Recent Alerts
+                    </div>
+                </div>
+                <div class="alert-list">
+                    <div class="alert-item">
+                        <div class="alert-icon critical">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-message">47 failed trial charges in last 2 hours</div>
+                            <div class="alert-time">2 hours ago • Back Pain Relief Funnel</div>
+                        </div>
+                        <button class="alert-action">Review</button>
+                    </div>
+
+                    <div class="alert-item">
+                        <div class="alert-icon warning">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-message">Trial-to-paid rate dropped to 58% (below 62% target)</div>
+                            <div class="alert-time">4 hours ago • Foot Pain Mat Funnel</div>
+                        </div>
+                        <button class="alert-action">Analyze</button>
+                    </div>
+
+                    <div class="alert-item">
+                        <div class="alert-icon warning">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-message">AOV decreased by 15% week-over-week</div>
+                            <div class="alert-time">6 hours ago • Shoulder Support Funnel</div>
+                        </div>
+                        <button class="alert-action">Check</button>
+                    </div>
+
+                    <div class="alert-item">
+                        <div class="alert-icon info">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 16v-4"></path>
+                                <path d="M12 8h.01"></path>
+                            </svg>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-message">New high-performing funnel: 78% trial conversion</div>
+                            <div class="alert-time">1 day ago • Knee Brace TBYB Funnel</div>
+                        </div>
+                        <button class="alert-action">Scale</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top 5 Funnels -->
+            <div class="funnels-section">
+                <div class="funnels-header">
+                    <div class="funnels-title">Top Performing Funnels</div>
+                    <a href="#" class="view-all-link">View All Funnels →</a>
+                </div>
+                <div class="funnel-list">
+                    <div class="funnel-item">
+                        <div class="funnel-icon" style="background: linear-gradient(135deg, #059669, #047857);">B</div>
+                        <div class="funnel-info">
+                            <div class="funnel-name">Back Pain Relief Device TBYB</div>
+                            <div class="funnel-meta">
+                                <span>Updated 4 hours ago</span>
+                                <span class="funnel-status status-active">● Active</span>
+                            </div>
+                        </div>
+                        <div class="funnel-metrics">
+                            <div class="metric">
+                                <div class="metric-value">68.2%</div>
+                                <div class="metric-label">Trial Conv</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$156</div>
+                                <div class="metric-label">AOV</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$28,450</div>
+                                <div class="metric-label">Revenue</div>
+                            </div>
+                        </div>
+                        <div class="funnel-trend trend-up">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline>
+                                <polyline points="17,6 23,6 23,12"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="funnel-item">
+                        <div class="funnel-icon" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);">K</div>
+                        <div class="funnel-info">
+                            <div class="funnel-name">Knee Brace Support TBYB</div>
+                            <div class="funnel-meta">
+                                <span>Updated 1 day ago</span>
+                                <span class="funnel-status status-active">● Active</span>
+                            </div>
+                        </div>
+                        <div class="funnel-metrics">
+                            <div class="metric">
+                                <div class="metric-value">78.1%</div>
+                                <div class="metric-label">Trial Conv</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$134</div>
+                                <div class="metric-label">AOV</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$19,890</div>
+                                <div class="metric-label">Revenue</div>
+                            </div>
+                        </div>
+                        <div class="funnel-trend trend-up">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline>
+                                <polyline points="17,6 23,6 23,12"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="funnel-item">
+                        <div class="funnel-icon" style="background: linear-gradient(135deg, #dc2626, #b91c1c);">S</div>
+                        <div class="funnel-info">
+                            <div class="funnel-name">Shoulder Support TBYB</div>
+                            <div class="funnel-meta">
+                                <span>Updated 2 days ago</span>
+                                <span class="funnel-status status-active">● Active</span>
+                            </div>
+                        </div>
+                        <div class="funnel-metrics">
+                            <div class="metric">
+                                <div class="metric-value">61.4%</div>
+                                <div class="metric-label">Trial Conv</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$128</div>
+                                <div class="metric-label">AOV</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$15,670</div>
+                                <div class="metric-label">Revenue</div>
+                            </div>
+                        </div>
+                        <div class="funnel-trend trend-down">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,18 13.5,8.5 8.5,13.5 1,6"></polyline>
+                                <polyline points="17,18 23,18 23,12"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="funnel-item">
+                        <div class="funnel-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">F</div>
+                        <div class="funnel-info">
+                            <div class="funnel-name">Foot Pain Relief Mat</div>
+                            <div class="funnel-meta">
+                                <span>Updated 3 days ago</span>
+                                <span class="funnel-status status-testing">● Testing</span>
+                            </div>
+                        </div>
+                        <div class="funnel-metrics">
+                            <div class="metric">
+                                <div class="metric-value">58.7%</div>
+                                <div class="metric-label">Trial Conv</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$89</div>
+                                <div class="metric-label">AOV</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$12,340</div>
+                                <div class="metric-label">Revenue</div>
+                            </div>
+                        </div>
+                        <div class="funnel-trend trend-down">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23,18 13.5,8.5 8.5,13.5 1,6"></polyline>
+                                <polyline points="17,18 23,18 23,12"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="funnel-item">
+                        <div class="funnel-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">N</div>
+                        <div class="funnel-info">
+                            <div class="funnel-name">Neck Pain Relief Device</div>
+                            <div class="funnel-meta">
+                                <span>Updated 1 week ago</span>
+                                <span class="funnel-status status-active">● Active</span>
+                            </div>
+                        </div>
+                        <div class="funnel-metrics">
+                            <div class="metric">
+                                <div class="metric-value">64.9%</div>
+                                <div class="metric-label">Trial Conv</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$142</div>
+                                <div class="metric-label">AOV</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">$10,980</div>
+                                <div class="metric-label">Revenue</div>
+                            </div>
+                        </div>
+                        <div class="funnel-trend trend-flat">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom Date Range Modal -->
+    <div class="custom-date-modal" id="customDateModal">
+        <div class="custom-date-content">
+            <div class="custom-date-header">
+                <h3 class="custom-date-title">Select Date Range</h3>
+                <button class="close-modal" id="closeModal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="date-range-inputs">
+                <div class="date-input-group">
+                    <label class="date-input-label">From Date</label>
+                    <input type="date" class="date-input" id="fromDate">
+                </div>
+                <div class="date-input-group">
+                    <label class="date-input-label">To Date</label>
+                    <input type="date" class="date-input" id="toDate">
+                </div>
+            </div>
+
+            <div class="quick-presets">
+                <button class="preset-btn" data-preset="7d">Last 7 days</button>
+                <button class="preset-btn" data-preset="14d">Last 14 days</button>
+                <button class="preset-btn" data-preset="30d">Last 30 days</button>
+                <button class="preset-btn" data-preset="90d">Last 90 days</button>
+                <button class="preset-btn" data-preset="this-month">This Month</button>
+                <button class="preset-btn" data-preset="last-month">Last Month</button>
+            </div>
+
+            <div class="compare-option">
+                <input type="checkbox" class="compare-checkbox" id="compareCheckbox">
+                <label for="compareCheckbox">Compare to previous period</label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="cancelModal">Cancel</button>
+                <button class="modal-btn apply" id="applyModal">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Date picker functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const datePicker = document.getElementById('datePicker');
+            const dateDropdown = document.getElementById('dateDropdown');
+            const datePickerText = document.getElementById('datePickerText');
+            const pageSubtitle = document.querySelector('.page-subtitle');
+            const customDateModal = document.getElementById('customDateModal');
+            const closeModal = document.getElementById('closeModal');
+            const cancelModal = document.getElementById('cancelModal');
+            const applyModal = document.getElementById('applyModal');
+            const fromDate = document.getElementById('fromDate');
+            const toDate = document.getElementById('toDate');
+            const compareCheckbox = document.getElementById('compareCheckbox');
+            
+            // Toggle dropdown
+            datePicker.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = dateDropdown.classList.contains('show');
+                dateDropdown.classList.toggle('show');
+                datePicker.classList.toggle('open');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                dateDropdown.classList.remove('show');
+                datePicker.classList.remove('open');
+            });
+
+            // Date option selection
+            const dateOptions = document.querySelectorAll('.date-option:not(.custom)');
+            dateOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    dateOptions.forEach(opt => opt.classList.remove('selected'));
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    // Update button text
+                    const text = this.querySelector('span').textContent;
+                    datePickerText.textContent = text;
+                    
+                    // Update subtitle
+                    let subtitleText = '';
+                    switch(this.dataset.value) {
+                        case 'today':
+                            subtitleText = 'Performance overview for today';
+                            break;
+                        case 'yesterday':
+                            subtitleText = 'Performance overview for yesterday';
+                            break;
+                        case '7d':
+                            subtitleText = 'Performance overview for the last 7 days';
+                            break;
+                        case '30d':
+                            subtitleText = 'Performance overview for the last 30 days';
+                            break;
+                        case 'this-week':
+                            subtitleText = 'Performance overview for this week';
+                            break;
+                        case 'last-week':
+                            subtitleText = 'Performance overview for last week';
+                            break;
+                        case 'this-month':
+                            subtitleText = 'Performance overview for this month';
+                            break;
+                        case 'last-month':
+                            subtitleText = 'Performance overview for last month';
+                            break;
+                    }
+                    pageSubtitle.textContent = subtitleText;
+                    
+                    // Close dropdown
+                    dateDropdown.classList.remove('show');
+                    datePicker.classList.remove('open');
+                    
+                    console.log(`Switching to ${text} view`);
+                });
+            });
+
+            // Custom date range option
+            const customOption = document.querySelector('.date-option.custom');
+            customOption.addEventListener('click', function() {
+                dateDropdown.classList.remove('show');
+                datePicker.classList.remove('open');
+                customDateModal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            });
+
+            // Close custom date modal
+            function closeCustomModal() {
+                customDateModal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+
+            closeModal.addEventListener('click', closeCustomModal);
+            cancelModal.addEventListener('click', closeCustomModal);
+            
+            // Close modal when clicking outside
+            customDateModal.addEventListener('click', function(e) {
+                if (e.target === customDateModal) {
+                    closeCustomModal();
+                }
+            });
+
+            // Quick preset buttons in modal
+            const presetBtns = document.querySelectorAll('.preset-btn');
+            presetBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all presets
+                    presetBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked preset
+                    this.classList.add('active');
+                    
+                    // Set date inputs based on preset
+                    const today = new Date();
+                    const preset = this.dataset.preset;
+                    let fromDateValue, toDateValue;
+                    
+                    switch(preset) {
+                        case '7d':
+                            fromDateValue = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            toDateValue = today;
+                            break;
+                        case '14d':
+                            fromDateValue = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
+                            toDateValue = today;
+                            break;
+                        case '30d':
+                            fromDateValue = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                            toDateValue = today;
+                            break;
+                        case '90d':
+                            fromDateValue = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
+                            toDateValue = today;
+                            break;
+                        case 'this-month':
+                            fromDateValue = new Date(today.getFullYear(), today.getMonth(), 1);
+                            toDateValue = today;
+                            break;
+                        case 'last-month':
+                            fromDateValue = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                            toDateValue = new Date(today.getFullYear(), today.getMonth(), 0);
+                            break;
+                    }
+                    
+                    fromDate.value = fromDateValue.toISOString().split('T')[0];
+                    toDate.value = toDateValue.toISOString().split('T')[0];
+                });
+            });
+
+            // Apply custom date range
+            applyModal.addEventListener('click', function() {
+                const from = fromDate.value;
+                const to = toDate.value;
+                const compare = compareCheckbox.checked;
+                
+                if (!from || !to) {
+                    alert('Please select both from and to dates');
+                    return;
+                }
+                
+                if (new Date(from) > new Date(to)) {
+                    alert('From date cannot be after to date');
+                    return;
+                }
+                
+                // Format date range for display
+                const fromFormatted = new Date(from).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const toFormatted = new Date(to).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const rangeText = `${fromFormatted} - ${toFormatted}`;
+                
+                datePickerText.textContent = rangeText;
+                pageSubtitle.textContent = `Performance overview for ${rangeText}${compare ? ' (with comparison)' : ''}`;
+                
+                // Remove selected class from all standard options
+                dateOptions.forEach(opt => opt.classList.remove('selected'));
+                
+                closeCustomModal();
+                
+                console.log(`Custom range: ${from} to ${to}, Compare: ${compare}`);
+            });
+            
+            // Initialize default date inputs
+            const today = new Date();
+            const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            toDate.value = today.toISOString().split('T')[0];
+            fromDate.value = sevenDaysAgo.toISOString().split('T')[0];
+
+            // Other existing functionality...
+            // Alert action buttons
+            const alertActions = document.querySelectorAll('.alert-action');
+            alertActions.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const action = this.textContent;
+                    const alertMessage = this.closest('.alert-item').querySelector('.alert-message').textContent;
+                    console.log(`${action} clicked for: ${alertMessage}`);
+                });
+            });
+            
+            // Funnel item clicks
+            const funnelItems = document.querySelectorAll('.funnel-item');
+            funnelItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const funnelName = this.querySelector('.funnel-name').textContent;
+                    console.log(`Opening funnel: ${funnelName}`);
+                    // Navigate to funnel details/editor
+                });
+            });
+            
+            // Create funnel button
+            const createBtn = document.querySelector('.create-btn');
+            createBtn.addEventListener('click', function() {
+                console.log('Opening funnel builder...');
+                // Navigate to funnel builder
+            });
+        });
+    </script>
+</body>
+</html>
